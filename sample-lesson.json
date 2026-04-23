@@ -1,0 +1,254 @@
+{
+  "title": "How async/await really works",
+  "slides": [
+    {
+      "type": "title",
+      "narration": "Let's unpack how async and await actually work. By the end you'll see they're just a nicer syntax for promises.",
+      "data": {
+        "accent": "JavaScript fundamentals",
+        "title": "How async/await really works",
+        "subtitle": "Promises, the event loop, and what await actually does"
+      }
+    },
+    {
+      "type": "definition",
+      "narration": "First, the one sentence definition. An async function returns a promise, and await pauses that function until the promise settles.",
+      "data": {
+        "term": "async / await",
+        "definition": "Syntax that lets you write non-blocking code as if it were sequential, by pausing a function until a promise resolves.",
+        "also": "Promises, the event loop"
+      }
+    },
+    {
+      "type": "bullets",
+      "narration": "Why care? Three reasons this matters in everyday code.",
+      "data": {
+        "heading": "Why it matters",
+        "style": "check",
+        "items": [
+          "Reads top-to-bottom like normal code",
+          "Errors work with plain try / catch",
+          "Parallel work becomes explicit, not accidental"
+        ]
+      }
+    },
+    {
+      "type": "callout",
+      "narration": "Here's the key insight most tutorials bury. Async and await aren't a new runtime feature — they're syntax sugar on top of promises.",
+      "data": {
+        "kind": "info",
+        "title": "Key insight",
+        "body": "async/await is pure syntax sugar over Promises — nothing new at runtime."
+      }
+    },
+    {
+      "type": "code",
+      "narration": "The minimum you need. Mark a function async, and you can await any promise inside. The return value is wrapped in a promise automatically.",
+      "data": {
+        "heading": "The simplest async function",
+        "caption": "Highlighted lines are what async adds.",
+        "language": "javascript",
+        "highlight": [1, 3],
+        "code": "async function getUser(id) {\n  const res = await fetch(`/api/users/${id}`);\n  return res.json();\n}"
+      }
+    },
+    {
+      "type": "flowDiagram",
+      "narration": "So what really happens on await? The function leaves the call stack, the runtime does the pending work, and when the promise settles the function resumes.",
+      "data": {
+        "heading": "What happens on await",
+        "direction": "LR",
+        "nodes": [
+          { "id": "a", "label": "Call stack" },
+          { "id": "b", "label": "Pending promise" },
+          { "id": "c", "label": "Microtask queue" },
+          { "id": "d", "label": "Resume" }
+        ],
+        "edges": [
+          { "from": "a", "to": "b", "label": "await" },
+          { "from": "b", "to": "c", "label": "settles" },
+          { "from": "c", "to": "d", "label": "continue" }
+        ]
+      }
+    },
+    {
+      "type": "sequenceDiagram",
+      "narration": "Same story, but as an interaction. The caller invokes the async function, which kicks off a fetch, control returns to the event loop, and resumption happens when the response lands.",
+      "data": {
+        "heading": "Timing of a fetch",
+        "actors": ["Caller", "async fn", "fetch", "Network"],
+        "messages": [
+          { "from": "Caller", "to": "async fn", "text": "invoke" },
+          { "from": "async fn", "to": "fetch", "text": "await fetch" },
+          { "from": "fetch", "to": "Network", "text": "HTTP GET" },
+          { "from": "Network", "to": "fetch", "text": "response" },
+          { "from": "fetch", "to": "async fn", "text": "resume" },
+          { "from": "async fn", "to": "Caller", "text": "return value" }
+        ]
+      }
+    },
+    {
+      "type": "codeCompare",
+      "narration": "Before async, chaining many network calls meant nested callbacks or long promise chains. With async, it reads flat.",
+      "data": {
+        "leftLabel": "Callback chain",
+        "leftKind": "bad",
+        "leftLanguage": "javascript",
+        "leftCode": "fetch('/a', (a) => {\n  fetch('/b/' + a.id, (b) => {\n    fetch('/c/' + b.id, (c) => {\n      done(c);\n    });\n  });\n});",
+        "rightLabel": "async / await",
+        "rightKind": "good",
+        "rightLanguage": "javascript",
+        "rightCode": "const a = await fetch('/a');\nconst b = await fetch('/b/' + a.id);\nconst c = await fetch('/c/' + b.id);\ndone(c);"
+      }
+    },
+    {
+      "type": "steps",
+      "narration": "If you're converting legacy callback code, here's the short recipe. Four steps.",
+      "data": {
+        "heading": "Converting callbacks to async",
+        "steps": [
+          { "title": "Wrap the API", "detail": "Expose a Promise-returning version of the callback API." },
+          { "title": "Mark callers async", "detail": "Add the async keyword so you can use await inside." },
+          { "title": "Replace callbacks with await", "detail": "One await per former callback." },
+          { "title": "Wrap errors in try / catch", "detail": "Replaces the (err, result) callback pattern." }
+        ]
+      }
+    },
+    {
+      "type": "terminal",
+      "narration": "You can test your async code right in the terminal. Modern Node supports top level await in ES module files.",
+      "data": {
+        "prompt": "$",
+        "command": "node --input-type=module -e \"const r = await fetch('https://api.github.com'); console.log(r.status)\"",
+        "output": ["200"]
+      }
+    },
+    {
+      "type": "fileTree",
+      "narration": "A typical project layout. The interesting bit lives in services, where async functions wrap your data access.",
+      "data": {
+        "heading": "Typical project layout",
+        "entries": [
+          { "name": "src/", "kind": "dir", "depth": 0 },
+          { "name": "index.js", "depth": 1 },
+          { "name": "services/", "kind": "dir", "depth": 1 },
+          { "name": "users.js", "depth": 2, "highlight": true, "note": "async DB calls" },
+          { "name": "posts.js", "depth": 2 },
+          { "name": "utils/", "kind": "dir", "depth": 1, "dim": true },
+          { "name": "package.json", "depth": 0, "dim": true }
+        ]
+      }
+    },
+    {
+      "type": "twoColumn",
+      "narration": "Mental model check. Synchronous code waits and blocks. Async code yields, letting other work happen while it waits.",
+      "data": {
+        "leftHeading": "Synchronous",
+        "leftBody": "Each line blocks until it finishes. Simple but stalls the whole program.",
+        "rightHeading": "Asynchronous",
+        "rightBody": "Awaited tasks yield control. Other code runs while you wait on I/O."
+      }
+    },
+    {
+      "type": "warning",
+      "narration": "Two traps beginners hit constantly. Forgetting await, which returns a promise object instead of a value. And unhandled rejections, which can crash your process.",
+      "data": {
+        "title": "Common pitfalls",
+        "pitfalls": [
+          "Forgetting await — you get a Promise object, not the value.",
+          "Unhandled rejection — always catch, or attach a global handler.",
+          "Awaiting inside a loop serially when you meant to run in parallel."
+        ]
+      }
+    },
+    {
+      "type": "architecture",
+      "narration": "Zooming out. JavaScript itself is single threaded. But the runtime gives you async APIs, and the event loop coordinates the handoff.",
+      "data": {
+        "heading": "Where async lives",
+        "layers": [
+          { "name": "Your code", "nodes": ["async functions", "promise chains"] },
+          { "name": "Language", "nodes": ["Promise", "Microtask queue"] },
+          { "name": "Runtime", "nodes": ["Event loop", "Web APIs / libuv", "Timers"] }
+        ]
+      }
+    },
+    {
+      "type": "timeline",
+      "narration": "A quick history lesson. Every async abstraction built on the one before.",
+      "data": {
+        "heading": "How we got here",
+        "events": [
+          { "time": "2009", "event": "Node.js ships — nested callbacks everywhere." },
+          { "time": "2015", "event": "Promises standardized in ES6." },
+          { "time": "2017", "event": "async/await lands in ES2017." },
+          { "time": "2022", "event": "Top-level await arrives in ESM." }
+        ]
+      }
+    },
+    {
+      "type": "stats",
+      "narration": "The numbers that drove adoption. Moving from callbacks to async typically cuts code in half with zero runtime cost.",
+      "data": {
+        "heading": "By the numbers",
+        "items": [
+          { "value": "~50%", "label": "less code vs. callbacks" },
+          { "value": "0", "label": "extra runtime cost" },
+          { "value": "1", "label": "thread — still" }
+        ]
+      }
+    },
+    {
+      "type": "image",
+      "narration": "A simple mental picture. Think of the event loop as a conveyor belt — tasks finish, ready jobs get picked up.",
+      "data": {
+        "alt": "Event loop as conveyor belt",
+        "caption": "The event loop constantly checks: anything ready to resume?",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 320'><rect width='800' height='320' fill='%23161b24'/><rect x='40' y='140' width='720' height='40' rx='20' fill='%230f1218' stroke='%23232a36'/><circle cx='120' cy='160' r='22' fill='%237c9cff'/><circle cx='260' cy='160' r='22' fill='%237c9cff'/><circle cx='400' cy='160' r='22' fill='%239d7cff'/><circle cx='540' cy='160' r='22' fill='%239d7cff'/><circle cx='680' cy='160' r='22' fill='%239d7cff'/><text x='400' y='80' text-anchor='middle' fill='%23e7ecf3' font-family='sans-serif' font-size='24' font-weight='600'>Event loop - tasks move along</text><text x='400' y='260' text-anchor='middle' fill='%2398a2b3' font-family='sans-serif' font-size='14'>ready then pick up then run then repeat</text></svg>"
+      }
+    },
+    {
+      "type": "quiz",
+      "narration": "Quick check. What does the await keyword actually do? Hint: it's not what most tutorials say.",
+      "data": {
+        "question": "What does `await` do?",
+        "choices": [
+          "Blocks the main thread until the promise resolves",
+          "Creates a new thread to wait on the promise",
+          "Pauses only the current async function, yielding to the event loop",
+          "Converts a callback into a promise"
+        ],
+        "answerIndex": 2,
+        "explanation": "await suspends the async function and registers its continuation as a microtask. The thread keeps running everything else."
+      }
+    },
+    {
+      "type": "comparison",
+      "narration": "Promise chains and async/await are equivalent in power. The difference is ergonomics.",
+      "data": {
+        "heading": "Promise chain vs async/await",
+        "leftLabel": ".then chain",
+        "rightLabel": "async / await",
+        "rows": [
+          { "label": "Flow", "left": "Chained callbacks", "right": "Sequential lines" },
+          { "label": "Errors", "left": ".catch(err => ...)", "right": "try / catch" },
+          { "label": "Debug", "left": "Harder stack traces", "right": "Natural stack traces" },
+          { "label": "Parallelism", "left": "Promise.all", "right": "Promise.all + await" }
+        ]
+      }
+    },
+    {
+      "type": "summary",
+      "narration": "Wrapping up. Async and await are the friendliest face of promises. Use them everywhere, watch the pitfalls, and remember the event loop is still doing the real work.",
+      "data": {
+        "heading": "What to take away",
+        "points": [
+          "async/await is syntax over Promises — not a new feature.",
+          "await pauses the function, not the thread.",
+          "try/catch replaces .catch; Promise.all runs work in parallel.",
+          "Forgetting await is the single most common mistake."
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GitExplain — narrated code lessons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="/player.css" />
+  </head>
+  <body class="landing home">
+    <div class="pixel-grid" aria-hidden="true"></div>
+    <div class="pixel-scatter" aria-hidden="true">
+      <span class="px" style="--x:8%;--y:12%;--c:var(--cyan)">＋</span>
+      <span class="px" style="--x:92%;--y:18%;--c:var(--pink)">＋</span>
+      <span class="px" style="--x:4%;--y:48%;--c:var(--yellow)">·</span>
+      <span class="px" style="--x:96%;--y:54%;--c:var(--accent-2)">·</span>
+      <span class="px" style="--x:14%;--y:84%;--c:var(--cyan)">＋</span>
+      <span class="px" style="--x:88%;--y:80%;--c:var(--pink)">·</span>
+      <span class="px" style="--x:48%;--y:6%;--c:var(--accent-2)">·</span>
+      <span class="px" style="--x:52%;--y:92%;--c:var(--yellow)">＋</span>
+    </div>
+
+    <div class="pixel-icons" aria-hidden="true">
+      <!-- Slides icon -->
+      <div class="pic" style="--x:7%;--y:22%;--rot:-6deg">
+        <svg viewBox="0 0 32 32">
+          <rect x="6" y="4" width="20" height="16" fill="#a78bfa"/>
+          <rect x="8" y="6" width="16" height="12" fill="#1a0f3a"/>
+          <rect x="10" y="8" width="4" height="2" fill="#67e8f9"/>
+          <rect x="10" y="12" width="10" height="2" fill="#67e8f9"/>
+          <rect x="10" y="16" width="6" height="2" fill="#67e8f9"/>
+          <rect x="4" y="22" width="24" height="2" fill="#a78bfa"/>
+          <rect x="14" y="24" width="4" height="2" fill="#a78bfa"/>
+          <rect x="10" y="26" width="12" height="2" fill="#a78bfa"/>
+        </svg>
+      </div>
+      <!-- Mic icon -->
+      <div class="pic" style="--x:11%;--y:68%;--rot:7deg">
+        <svg viewBox="0 0 32 32">
+          <rect x="12" y="6" width="8" height="14" fill="#f472b6"/>
+          <rect x="10" y="8" width="2" height="10" fill="#f472b6"/>
+          <rect x="20" y="8" width="2" height="10" fill="#f472b6"/>
+          <rect x="8" y="14" width="2" height="4" fill="#f472b6"/>
+          <rect x="22" y="14" width="2" height="4" fill="#f472b6"/>
+          <rect x="14" y="22" width="4" height="4" fill="#f472b6"/>
+          <rect x="10" y="26" width="12" height="2" fill="#f472b6"/>
+        </svg>
+      </div>
+      <!-- Agent icon -->
+      <div class="pic" style="--x:86%;--y:20%;--rot:8deg">
+        <svg viewBox="0 0 32 32">
+          <rect x="10" y="4" width="12" height="4" fill="#67e8f9"/>
+          <rect x="8" y="8" width="16" height="14" fill="#67e8f9"/>
+          <rect x="10" y="10" width="4" height="2" fill="#04161c"/>
+          <rect x="18" y="10" width="4" height="2" fill="#04161c"/>
+          <rect x="12" y="16" width="8" height="2" fill="#04161c"/>
+          <rect x="6" y="12" width="2" height="6" fill="#67e8f9"/>
+          <rect x="24" y="12" width="2" height="6" fill="#67e8f9"/>
+          <rect x="12" y="22" width="2" height="4" fill="#67e8f9"/>
+          <rect x="18" y="22" width="2" height="4" fill="#67e8f9"/>
+          <rect x="14" y="2" width="4" height="2" fill="#fde047"/>
+        </svg>
+      </div>
+      <!-- Terminal icon -->
+      <div class="pic" style="--x:89%;--y:70%;--rot:-5deg">
+        <svg viewBox="0 0 32 32">
+          <rect x="4" y="6" width="24" height="20" fill="#fde047"/>
+          <rect x="6" y="8" width="20" height="16" fill="#1a0f3a"/>
+          <rect x="8" y="10" width="2" height="2" fill="#fde047"/>
+          <rect x="10" y="12" width="2" height="2" fill="#fde047"/>
+          <rect x="12" y="14" width="2" height="2" fill="#fde047"/>
+          <rect x="10" y="16" width="2" height="2" fill="#fde047"/>
+          <rect x="8" y="18" width="2" height="2" fill="#fde047"/>
+          <rect x="14" y="18" width="10" height="2" fill="#fde047"/>
+        </svg>
+      </div>
+    </div>
+
+    <main class="home-hero">
+      <h1 class="brand">GitExplain</h1>
+      <p class="tagline">Narrated slide-video lessons, by your AI agent.</p>
+
+      <div class="install">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-client="kiro" role="tab">Kiro</button>
+          <button class="tab" data-client="claude" role="tab">Claude Code</button>
+          <button class="tab" data-client="codex" role="tab">Codex</button>
+          <button class="tab" data-client="cursor" role="tab">Cursor</button>
+          <button class="tab" data-client="windsurf" role="tab">Windsurf</button>
+        </div>
+        <div class="cmd-box">
+          <pre><code id="cmd">{
+  "mcpServers": {
+    "gitexplain": {
+      "command": "npx",
+      "args": ["-y", "gitexplain-mcp"]
+    }
+  }
+}</code></pre>
+          <button id="copy" class="copy-btn" aria-label="Copy command">Copy</button>
+        </div>
+        <p class="hint" id="hint">Paste into Kiro → Settings → MCP servers, then ask Kiro to "explain this code".</p>
+      </div>
+
+      <p class="footnote">Free ElevenLabs key, set once in the browser · <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener">github</a></p>
+    </main>
+
+    <script>
+      const CLIENTS = {
+        kiro: {
+          cmd: '{\n  "mcpServers": {\n    "gitexplain": {\n      "command": "npx",\n      "args": ["-y", "gitexplain-mcp"]\n    }\n  }\n}',
+          hint: 'Paste into Kiro → Settings → MCP servers, then ask Kiro to "explain this code".',
+        },
+        claude: {
+          cmd: 'claude mcp add gitexplain -- npx -y gitexplain-mcp',
+          hint: 'Run in your terminal, then ask Claude to "explain this code".',
+        },
+        codex: {
+          cmd: 'codex mcp add gitexplain -- npx -y gitexplain-mcp',
+          hint: 'Run in your terminal, then ask Codex to "walk me through this repo".',
+        },
+        cursor: {
+          cmd: '{\n  "mcpServers": {\n    "gitexplain": {\n      "command": "npx",\n      "args": ["-y", "gitexplain-mcp"]\n    }\n  }\n}',
+          hint: 'Paste into Cursor → Settings → MCP → Add a server.',
+        },
+        windsurf: {
+          cmd: '{\n  "mcpServers": {\n    "gitexplain": {\n      "command": "npx",\n      "args": ["-y", "gitexplain-mcp"]\n    }\n  }\n}',
+          hint: 'Paste into Windsurf → Settings → MCP servers.',
+        },
+      };
+      const cmdEl = document.getElementById('cmd');
+      const hintEl = document.getElementById('hint');
+      const copyBtn = document.getElementById('copy');
+      document.querySelectorAll('.tab').forEach((t) => {
+        t.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach((x) => x.classList.remove('active'));
+          t.classList.add('active');
+          const c = CLIENTS[t.dataset.client];
+          cmdEl.textContent = c.cmd;
+          hintEl.textContent = c.hint;
+        });
+      });
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(cmdEl.textContent);
+          copyBtn.textContent = 'Copied ✓';
+          copyBtn.classList.add('ok');
+          setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('ok'); }, 1400);
+        } catch (e) {
+          copyBtn.textContent = 'Failed';
+        }
+      });
+    </script>
+  </body>
+</html>

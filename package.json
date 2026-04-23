@@ -1,0 +1,35 @@
+{
+  "name": "gitexplain-mcp",
+  "version": "0.2.0",
+  "description": "MCP server that lets AI agents generate narrated slide-video lessons explaining code. Uses ElevenLabs Flash v2.5 for real-time voice.",
+  "type": "module",
+  "bin": {
+    "gitexplain-mcp": "./mcp/dist/index.js"
+  },
+  "main": "server.js",
+  "files": [
+    "server.js",
+    "public/",
+    "mcp/dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node server.js",
+    "sample": "node server.js sample-lesson.json",
+    "gallery": "node server.js gallery-lesson.json",
+    "build": "tsc -p mcp/tsconfig.json",
+    "mcp": "npm run build && node mcp/dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^20.0.0"
+  },
+  "license": "MIT"
+}

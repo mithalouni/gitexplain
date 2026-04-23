@@ -1,0 +1,123 @@
+{
+  "title": "Inside ToonStyles",
+  "slides": [
+    {
+      "type": "title",
+      "narration": "Tour of ToonStyles — a Next.js app that turns a photo of your kid into a personalized backpack design. By the end you'll know the full pipeline, from upload to checkout.",
+      "data": {
+        "title": "Inside ToonStyles",
+        "subtitle": "A Next.js shop that AI-generates personalized kids' backpacks"
+      }
+    },
+    {
+      "type": "bullets",
+      "narration": "The whole product in three moves. Upload a photo, let the AI drop the kid onto a dozen designs, then check out with Stripe.",
+      "data": {
+        "heading": "What ToonStyles does, in three moves",
+        "style": "check",
+        "items": [
+          "Parent uploads a photo and picks hobbies and cartoons the kid likes.",
+          "Backend detects the face, then composites it onto many design templates.",
+          "Generated backpacks land in a cart — Stripe handles checkout."
+        ]
+      }
+    },
+    {
+      "type": "fileTree",
+      "narration": "The layout. Everything lives under src. The wizard drives the user through five steps, and the generate API route is where the real work happens.",
+      "data": {
+        "heading": "Repo layout",
+        "entries": [
+          { "name": "src/", "kind": "dir", "depth": 0 },
+          { "name": "app/", "kind": "dir", "depth": 1 },
+          { "name": "page.tsx", "depth": 2, "note": "homepage" },
+          { "name": "create/page.tsx", "depth": 2, "note": "wizard entry" },
+          { "name": "api/generate/route.ts", "depth": 2, "highlight": true, "note": "core pipeline" },
+          { "name": "api/checkout/route.ts", "depth": 2, "note": "Stripe session" },
+          { "name": "api/webhooks/stripe/", "kind": "dir", "depth": 2, "dim": true },
+          { "name": "admin/", "kind": "dir", "depth": 2, "dim": true },
+          { "name": "components/", "kind": "dir", "depth": 1 },
+          { "name": "CreateBagWizard.tsx", "depth": 2, "highlight": true, "note": "5-step state machine" },
+          { "name": "wizard-steps/", "kind": "dir", "depth": 2 },
+          { "name": "contexts/CartContext.tsx", "depth": 1, "note": "localStorage cart" },
+          { "name": "lib/supabaseClient.ts", "depth": 1, "dim": true }
+        ]
+      }
+    },
+    {
+      "type": "architecture",
+      "narration": "Three layers. A React wizard in the browser, a Next.js API route in the middle, and a stack of external services doing the heavy lifting.",
+      "data": {
+        "heading": "Three layers",
+        "layers": [
+          { "name": "Browser", "nodes": ["Create wizard", "Cart context", "Product pages"] },
+          { "name": "Next.js API", "nodes": ["/api/generate", "/api/checkout", "/api/webhooks/stripe"] },
+          { "name": "External services", "nodes": ["OpenRouter GLM-4.6v", "Replicate image-edit", "Supabase DB + storage", "Stripe"] }
+        ]
+      }
+    },
+    {
+      "type": "sequenceDiagram",
+      "narration": "Here's one generation, end to end. The API fires face detection and the design fetch in parallel, sends each cropped face to Replicate, composites the result with Sharp, and uploads to Supabase storage.",
+      "data": {
+        "heading": "One generation, end to end",
+        "actors": ["Wizard", "API", "GLM", "Supabase", "Replicate"],
+        "messages": [
+          { "from": "Wizard", "to": "API", "text": "POST /api/generate" },
+          { "from": "API", "to": "GLM", "text": "detect face" },
+          { "from": "API", "to": "Supabase", "text": "fetch designs" },
+          { "from": "GLM", "to": "API", "text": "crop + age + gender" },
+          { "from": "API", "to": "Replicate", "text": "edit image per design" },
+          { "from": "Replicate", "to": "API", "text": "poster image" },
+          { "from": "API", "to": "Supabase", "text": "upload composite" },
+          { "from": "API", "to": "Wizard", "text": "design URLs" }
+        ]
+      }
+    },
+    {
+      "type": "code",
+      "narration": "The trick that keeps it snappy. Face detection takes about six seconds, fetching designs takes about two. Running them sequentially costs eight — running them together costs six.",
+      "data": {
+        "heading": "Parallel streaming inside /api/generate",
+        "caption": "route.ts — two slow tasks, one Promise.all",
+        "language": "typescript",
+        "highlight": [3, 4, 5],
+        "code": "// GLM face crop + Supabase fetch launched independently\nconst [cropResult, { designs, allAssets }] = await Promise.all([\n  cropTask,              // ~6s: OpenRouter GLM face detection\n  designsAndAssetsTask   // ~2s: designs row + preloaded asset images\n]);\n\n// Total wait = max(6, 2) = 6s, not 8s."
+      }
+    },
+    {
+      "type": "callout",
+      "narration": "A nice optimization on top. If the frontend already ran the GLM detection once, it sends the cached crop back on the next request and the API skips the whole face step.",
+      "data": {
+        "kind": "info",
+        "title": "Cached crop skip",
+        "body": "If the wizard already holds the GLM result from a prior request, it re-sends it as cachedCropData. The API short-circuits face detection entirely."
+      }
+    },
+    {
+      "type": "warning",
+      "narration": "Three things that will trip up a newcomer. Designs are silently filtered by gender and age. Authentication uses anonymous Supabase sessions. And admin login is a single hardcoded password.",
+      "data": {
+        "title": "Gotchas worth knowing",
+        "pitfalls": [
+          "Designs with gender or age_range constraints are silently skipped if GLM's guess doesn't match.",
+          "Most users are anonymous Supabase sessions — past designs only persist in localStorage.",
+          "Admin login is a single env-var password check, not real auth."
+        ]
+      }
+    },
+    {
+      "type": "summary",
+      "narration": "The whole thing in one breath. A wizard collects inputs, a single API route orchestrates four external services in parallel, Sharp does the final composite, and Stripe closes the loop.",
+      "data": {
+        "heading": "Takeaways",
+        "points": [
+          "One big API route — /api/generate — runs the whole AI pipeline.",
+          "Promise.all plus a cached crop keeps generation under seven seconds.",
+          "Sharp composites the Replicate poster onto a backpack mockup server-side.",
+          "Stripe checkout + webhook persists the order into Supabase."
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GitExplain lesson</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="/player.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" />
+  </head>
+  <body class="player">
+    <div class="bg-fx" aria-hidden="true"></div>
+    <div class="sprinkles" aria-hidden="true">
+      <span class="sp" style="--x:6%;--y:12%;--c:var(--cyan);--s:32px">✦</span>
+      <span class="sp" style="--x:92%;--y:18%;--c:var(--pink);--s:26px">＋</span>
+      <span class="sp" style="--x:10%;--y:78%;--c:var(--yellow);--s:30px">✶</span>
+      <span class="sp" style="--x:88%;--y:72%;--c:var(--accent-2);--s:28px">✺</span>
+      <span class="sp" style="--x:48%;--y:6%;--c:var(--cyan);--s:22px">*</span>
+      <span class="sp" style="--x:72%;--y:92%;--c:var(--pink);--s:24px">＝</span>
+      <span class="sp" style="--x:22%;--y:40%;--c:var(--accent);--s:18px">·</span>
+      <span class="sp" style="--x:94%;--y:45%;--c:var(--yellow);--s:20px">▲</span>
+    </div>
+    <div id="stage" class="stage"></div>
+    <div id="caption" class="caption" hidden></div>
+    <div id="audio-error" class="audio-error" hidden></div>
+    <div class="controls" id="controls">
+      <div class="progress"><div id="progress" class="progress-bar"></div></div>
+      <div class="row">
+        <button id="prev" class="btn" title="Previous (←)">◀◀</button>
+        <button id="playpause" class="btn btn-primary" title="Play/Pause (Space)">▶</button>
+        <button id="next" class="btn" title="Next (→)">▶▶</button>
+        <button id="restart" class="btn" title="Restart (R)">↺</button>
+        <button id="cc" class="btn" title="Captions (C)">CC</button>
+        <div class="spacer"></div>
+        <div id="counter" class="counter">0 / 0</div>
+        <div id="title" class="doc-title"></div>
+      </div>
+    </div>
+    <div id="gate" class="gate">
+      <div class="gate-card">
+        <div id="gate-title" class="gate-title">Lesson</div>
+        <div id="gate-sub" class="gate-sub">Ready to play</div>
+        <button id="start" class="btn btn-primary btn-big">▶ Start lesson</button>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="/player.js"></script>
+  </body>
+</html>

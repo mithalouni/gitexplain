@@ -1,0 +1,134 @@
+{
+  "title": "GitExplain — tour of this codebase",
+  "slides": [
+    {
+      "type": "title",
+      "narration": "Quick tour of the GitExplain codebase. By the end you'll know what every file does, how a slide becomes narrated audio, and where to add your own slide types.",
+      "data": {
+        "accent": "Codebase walkthrough",
+        "title": "Tour of the GitExplain codebase",
+        "subtitle": "A local server that turns JSON lessons into narrated slide videos"
+      }
+    },
+    {
+      "type": "bullets",
+      "narration": "Three things this repo does. One server, one player, one JSON contract between them.",
+      "data": {
+        "heading": "What GitExplain does, in three moves",
+        "style": "check",
+        "items": [
+          "Accepts a lesson JSON over HTTP and stores it in memory.",
+          "Streams narration for each slide from ElevenLabs Flash v2.5.",
+          "Plays the slides in a browser with synchronized audio and prefetch."
+        ]
+      }
+    },
+    {
+      "type": "fileTree",
+      "narration": "Here's the whole repo. Only seven files matter — server, the four-file player in public, the sample lesson, and the README.",
+      "data": {
+        "heading": "Repo layout",
+        "entries": [
+          { "name": "gitexplain/", "kind": "dir", "depth": 0 },
+          { "name": "server.js", "depth": 1, "highlight": true, "note": "Express server + ElevenLabs proxy" },
+          { "name": "package.json", "depth": 1, "dim": true },
+          { "name": "sample-lesson.json", "depth": 1, "note": "20-type demo lesson" },
+          { "name": "public/", "kind": "dir", "depth": 1 },
+          { "name": "index.html", "depth": 2, "dim": true, "note": "landing page" },
+          { "name": "player.html", "depth": 2, "note": "player shell" },
+          { "name": "player.css", "depth": 2, "dim": true },
+          { "name": "player.js", "depth": 2, "highlight": true, "note": "all 20 slide renderers" },
+          { "name": "README.md", "depth": 1, "dim": true }
+        ]
+      }
+    },
+    {
+      "type": "architecture",
+      "narration": "Three layers. The browser renders slides and asks for audio. The Node server stores lessons and proxies ElevenLabs. ElevenLabs runs the speech model.",
+      "data": {
+        "heading": "Three layers",
+        "layers": [
+          { "name": "Browser", "nodes": ["player.html", "player.js (renderers)", "<audio> element"] },
+          { "name": "Local server (Node)", "nodes": ["Express routes", "lesson Map", "audio cache"] },
+          { "name": "ElevenLabs API", "nodes": ["Flash v2.5 model", "streaming TTS"] }
+        ]
+      }
+    },
+    {
+      "type": "sequenceDiagram",
+      "narration": "What happens when a slide plays. The audio element asks the server for an mp3. The server streams from ElevenLabs and tees the bytes — back to the browser and into a cache.",
+      "data": {
+        "heading": "Playing one slide",
+        "actors": ["Player", "Server", "Cache", "ElevenLabs"],
+        "messages": [
+          { "from": "Player", "to": "Server", "text": "GET /audio/:id/:n.mp3" },
+          { "from": "Server", "to": "Cache", "text": "cached?" },
+          { "from": "Server", "to": "ElevenLabs", "text": "POST /stream (if miss)" },
+          { "from": "ElevenLabs", "to": "Server", "text": "mp3 chunks" },
+          { "from": "Server", "to": "Player", "text": "stream chunks" },
+          { "from": "Server", "to": "Cache", "text": "store buffer" }
+        ]
+      }
+    },
+    {
+      "type": "code",
+      "narration": "The hot path. This is the audio route that proxies ElevenLabs and caches the result. Notice the highlighted lines — the response is written to the client and collected in memory at the same time.",
+      "data": {
+        "heading": "The hot path: /audio/:id/:idx.mp3",
+        "caption": "server.js — proxying and caching in one pass",
+        "language": "javascript",
+        "highlight": [6, 7, 8, 9, 11],
+        "code": "const upstream = await streamFromElevenLabs(slide.narration, voiceId);\nres.setHeader('Content-Type', 'audio/mpeg');\n\nconst chunks = [];\nconst reader = upstream.body.getReader();\nwhile (true) {\n  const { value, done } = await reader.read();\n  if (done) break;\n  const chunk = Buffer.from(value);\n  chunks.push(chunk);\n  res.write(chunk);\n}\nres.end();\naudioCache.set(cacheKey, Buffer.concat(chunks));"
+      }
+    },
+    {
+      "type": "flowDiagram",
+      "narration": "And the prefetch trick that makes slide transitions feel instant. While slide N plays, the player fires background fetches for N plus one and N plus two, so the server caches them before they're needed.",
+      "data": {
+        "heading": "Prefetch keeps transitions instant",
+        "direction": "LR",
+        "nodes": [
+          { "id": "n0", "label": "Slide N plays" },
+          { "id": "n1", "label": "Fetch N+1" },
+          { "id": "n2", "label": "Fetch N+2" },
+          { "id": "c", "label": "Cache warm" },
+          { "id": "r", "label": "Instant switch" }
+        ],
+        "edges": [
+          { "from": "n0", "to": "n1", "label": "bg" },
+          { "from": "n0", "to": "n2", "label": "bg" },
+          { "from": "n1", "to": "c" },
+          { "from": "n2", "to": "c" },
+          { "from": "c", "to": "r" }
+        ]
+      }
+    },
+    {
+      "type": "steps",
+      "narration": "Want to add a new slide type? Five small edits. Everything stays colocated in player.js and player.css.",
+      "data": {
+        "heading": "How to add a 21st slide type",
+        "steps": [
+          { "title": "Pick a name", "detail": "Lowercase camelCase, e.g. timelineRange. This is the value of slide.type." },
+          { "title": "Add a renderer", "detail": "One entry in the RENDERERS map in public/player.js. Takes (data, slide), returns HTML." },
+          { "title": "Style it", "detail": "Add a .s-yourtype block at the bottom of public/player.css." },
+          { "title": "Document the shape", "detail": "Add a row to the table in README.md." },
+          { "title": "Write an example", "detail": "Append a slide to sample-lesson.json so you can eyeball it." }
+        ]
+      }
+    },
+    {
+      "type": "summary",
+      "narration": "That's the whole codebase. One server, one player, twenty slide types, and a JSON contract. Next stop, wrapping this in an MCP tool any agent can call.",
+      "data": {
+        "heading": "Takeaways",
+        "points": [
+          "server.js is a thin Express proxy with in-memory lesson + audio caches.",
+          "public/player.js holds all 20 renderers — one function each.",
+          "Flash v2.5 + prefetch + tee-to-cache = near-instant slide transitions.",
+          "Next: an MCP tool create_lesson(title, slides) that posts to /api/lessons."
+        ]
+      }
+    }
+  ]
+}
