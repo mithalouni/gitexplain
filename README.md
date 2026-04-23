@@ -1,8 +1,6 @@
 # GitExplain — narrated code lessons
 
-A tiny local server that turns a JSON **lesson** into a browser-based "video": narrated slides with diagrams, code boxes, tree views, and more. Voice is streamed from ElevenLabs **Flash v2.5** for low latency.
-
-GitExplain is an MCP server. An AI coding agent (Kiro, Claude Code, Codex, Cursor, Windsurf) authors a lesson JSON, hands it to GitExplain, and the user gets a link that plays like a short video explaining their code.
+GitExplain explains your codebase with voice, diagrams, and code, so you actually understand what you vibe-coded a week ago. It's an MCP server you install into Kiro. Ask your agent to explain any repo or flow, and it generates a slide-video lesson powered by ElevenLabs text-to-speech. Built with Kiro's spec-driven workflow across 20 purpose-designed slide templates, runs locally, open source, your code never leaves your machine.
 
 ## Install
 
